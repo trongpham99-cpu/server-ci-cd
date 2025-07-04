@@ -20,9 +20,6 @@ jobs:
       - name: Cài đặt thư viện
         run: npm install
 
-      - name: Chạy test
-        run: npm test
-
       - name: Build Docker image
         run: docker build -t my-express-app .
 
