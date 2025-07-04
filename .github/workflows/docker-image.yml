@@ -2,7 +2,7 @@ name: Node.js CI/CD
 
 on:
   push:
-    branches: [master]
+    branches: [master]  # đổi thành 'main' nếu repo của bạn dùng main
 
 jobs:
   deploy:
@@ -26,10 +26,11 @@ jobs:
       - name: Đăng nhập Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Push Docker lên Docker Hub
+      - name: Tag & Push image
         run: |
-          docker tag my-express-app ${{ secrets.DOCKER_USERNAME }}/my-express-app:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/my-express-app:latest
+          IMAGE=${{ secrets.DOCKER_USERNAME }}/my-express-app:latest
+          docker tag my-express-app $IMAGE
+          docker push $IMAGE
 
       - name: SSH Deploy to VPS (using password)
         uses: appleboy/ssh-action@v1.0.0
@@ -39,6 +40,7 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           port: ${{ secrets.VPS_PORT }}
           script: |
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             docker pull ${{ secrets.DOCKER_USERNAME }}/my-express-app:latest
             docker stop my-express-app || true
             docker rm my-express-app || true
